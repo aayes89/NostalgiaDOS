@@ -20,8 +20,16 @@ typedef unsigned int       uintptr_t;
 typedef signed int         intptr_t;
 typedef unsigned int       size_t;
 
-// Booleanos para kernel bare-metal 
+// Nulos
+#ifndef NULL
+#define NULL 0
+#endif
 
+#ifndef null
+#define null 0
+#endif
+
+// Booleanos para kernel bare-metal 
 typedef unsigned char bool;
 
 #ifndef true
@@ -90,6 +98,31 @@ typedef enum {
 
 #define VGA_TEXT_COLUMNS       80
 #define VGA_TEXT_ROWS          25
+
+//
+// Limites de tipos enteros
+//
+
+#define INT8_MIN     (-128)
+#define INT16_MIN    (-32767 - 1)
+#define INT32_MIN    (-2147483647 - 1)
+#define INT64_MIN    (-9223372036854775807i64 - 1)
+
+#define INT8_MAX     (127)
+#define INT16_MAX    (32767)
+#define INT32_MAX    (2147483647)
+#define INT64_MAX    (9223372036854775807i64)
+
+#define UINT8_MAX    (0xffui8)
+#define UINT16_MAX   (0xffffui16)
+#define UINT32_MAX   (0xffffffffui32)
+#define UINT64_MAX   (0xffffffffffffffffui64)
+
+#define INTMAX_MIN   INT64_MIN
+#define INTMAX_MAX   INT64_MAX
+#define UINTMAX_MAX  UINT64_MAX
+
+#define SIZE_MAX     UINT32_MAX
 
 // MACROS 
 #define ARRAY_SIZE(array) \
