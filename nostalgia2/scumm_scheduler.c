@@ -1,7 +1,6 @@
 // Creado por Slam (2026)
 // Planificador
 #include "../include/scumm_scheduler.h"
-#include "../include/scumm.h"
 
 typedef struct {
     ScummVM vm;
