@@ -13,9 +13,7 @@ typedef struct {
     uint8_t module_id;
     uint32_t resource_offset;
 
-    uint16_t variables[SCUMM_VM_VARIABLES];
-    uint16_t stack[256];
-    uint8_t sp;
+    uint16_t variables[SCUMM_VM_VARIABLES];    
 
     int running;
     int error;
