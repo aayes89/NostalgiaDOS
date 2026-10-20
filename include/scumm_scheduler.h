@@ -2,6 +2,7 @@
 #ifndef SCUMM_SCHEDULER_H
 #define SCUMM_SCHEDULER_H
 #include "scumm_vm.h"
+#include "scumm.h"
 
 #define SCUMM_SCHEDULER_SLOTS 16
 #define SCUMM_SCHEDULER_STEPS 256
