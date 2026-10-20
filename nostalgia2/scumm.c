@@ -1,4 +1,4 @@
-// Creado por Slam (2026 - V0.0.10)
+// Creado por Slam (2026 - V0.0.11)
 #include "../include/common.h"
 #include "../include/scumm.h"
 #include "../include/game_modules.h"
@@ -189,9 +189,18 @@ int scumm_init(void) {
 
 int scumm_load_game(void) {
     game_loaded = 0;
-    if (!engine_initialized || !scumm_index_rooms()) return 0;
-    first_room = rooms[0]; // Arranque real en la Habitación 0 Global 
+    if (!engine_initialized || !scumm_index_rooms()) {
+		return 0;
+	}
+	
+	// Arranque real en la Habitación 0 Global 
+    first_room = rooms[0]; 
     game_loaded = 1;
+	
+	// Ejecuto el decodificador sobre la habitación recién montada 
+    if (!scumm_decode_background()) {
+        serial_write("Advertencia: No se pudo decodificar el fondo de Room 0.\n");
+    }
     return 1;
 }
 
@@ -217,10 +226,12 @@ void scumm_update(void) {
 		scumm_scheduler_update(); 
 	}
 }
+
 void scumm_stop(void) { 
 	scumm_running = 0; 
 	scumm_scheduler_stop_all();
 }
+
 int scumm_is_running(void) { 
 	return scumm_running; 
 }
@@ -305,15 +316,25 @@ static int decode_method1(const multiboot_module_t *module, uint32_t start, uint
     ScummBitReader reader = { module, start + 1, end, 0, 0};
 
     while (output < total) {
-        if (read_bit(&reader) == 1) {
-            if (read_bit(&reader) == 0) {
-                uint32_t val;
-                if (!read_bits(&reader, palette_bits, &val)) return 0;
-                color = (uint8_t)val;
+        int first = read_bit(&reader);
+        if (first < 0) return 0;
+        if (first == 1) {
+            int second = read_bit(&reader);
+            if (second < 0) return 0;
+            if (second == 0) {
+                uint32_t value;
+                if (!read_bits(&reader, palette_bits, &value)) return 0;
+                color = (uint8_t)value;
                 direction = 1;
             } else {
-                if (read_bit(&reader) == 0) color -= direction;
-                else { direction = -direction; color -= direction; }
+                int third = read_bit(&reader);
+                if (third < 0) return 0;
+                if (third == 0) {
+                    color = (uint8_t)(color - direction);
+                } else {
+                    direction = -direction;
+                    color = (uint8_t)(color - direction);
+                }
             }
         }
         put_strip_pixel(dest, dest_w, dest_h, strip, output++, color, vertical, base_x, base_y, item_h, is_object);
@@ -329,29 +350,43 @@ static int decode_method2(const multiboot_module_t *module, uint32_t start, uint
     uint32_t output = 0;
     uint8_t color = (uint8_t)initial;
 
+    // Inyectando el color inicial (siempre con vertical = 0 para Método 2) 
     put_strip_pixel(dest, dest_w, dest_h, strip, output++, color, 0, base_x, base_y, item_h, is_object);
     ScummBitReader reader = { module, start + 1, end, 0, 0 };
 
     while (output < total) {
-        if (read_bit(&reader) == 1) {
-            if (read_bit(&reader) == 0) {
-                uint32_t val;
-                if (!read_bits(&reader, palette_bits, &val)) return 0;
-                color = (uint8_t)val;
+        int first = read_bit(&reader);
+        if (first < 0) return 0;
+        
+        uint32_t repeat = 0;
+
+        if (first == 1) {
+            int second = read_bit(&reader);
+            if (second < 0) return 0;
+            if (second == 0) {
+                uint32_t value;
+                if (!read_bits(&reader, palette_bits, &value)) return 0;
+                color = (uint8_t)value;
             } else {
-                uint32_t delta, repeat = 0;
+                uint32_t delta;
                 if (!read_bits(&reader, 3, &delta)) return 0;
+                
                 if (delta == 4) {
                     if (!read_bits(&reader, 8, &repeat)) return 0;
-                } else color = (uint8_t)(color + (int)delta - 4);
-                
-                while (repeat-- > 0 && output < total) {
-                    put_strip_pixel(dest, dest_w, dest_h, strip, output++, color, 0, base_x, base_y, item_h, is_object);
+                } else {
+                    color = (uint8_t)(color + (int)delta - 4);
                 }
-                continue;
             }
         }
+
+        // Escribir el pixel obligatorio 
         put_strip_pixel(dest, dest_w, dest_h, strip, output++, color, 0, base_x, base_y, item_h, is_object);
+
+        // Si hubo delta==4, repeat > 0, procesamos el bloque original extra 
+        while (repeat > 0 && output < total) {
+            put_strip_pixel(dest, dest_w, dest_h, strip, output++, color, 0, base_x, base_y, item_h, is_object);
+            repeat--;
+        }
     }
     return 1;
 }
@@ -371,6 +406,8 @@ static int decode_strip(const multiboot_module_t *module, uint32_t start, uint32
 
     int vertical = 0, method = 0;
     unsigned p_bits = 0;
+    
+    // Mapeo de bits
     if (code >= 0x0E && code <= 0x12) { method = 1; vertical = 1; p_bits = code - 0x0A; }
     else if (code >= 0x18 && code <= 0x1C) { method = 1; p_bits = code - 0x14; }
     else if (code >= 0x22 && code <= 0x26) { method = 1; vertical = 1; p_bits = code - 0x1E; }
@@ -381,7 +418,10 @@ static int decode_strip(const multiboot_module_t *module, uint32_t start, uint32
     else if (code >= 0x7C && code <= 0x80) { method = 2; p_bits = code - 0x78; }
     else return 0;
 
-    if (method == 1) return decode_method1(module, start + 1, end, strip, vertical, p_bits, dest, dest_w, dest_h, base_x, base_y, item_h, is_object);
+    if (method == 1)
+		return decode_method1(module, start + 1, end, strip, vertical, p_bits, dest, dest_w, dest_h, base_x, base_y, item_h, is_object);
+    
+    // Method 2 de LucasArts siempre procesa sin "vertical" parameter 
     return decode_method2(module, start + 1, end, strip, p_bits, dest, dest_w, dest_h, base_x, base_y, item_h, is_object);
 }
 
@@ -457,9 +497,11 @@ void scumm_draw_frame(uint8_t *framebuffer, uint16_t dest_w, uint16_t dest_h) {
 const uint8_t *scumm_background_palette(void) { 
 	return palette; 
 }
+
 uint16_t scumm_background_width(void) { 
 	return background_width; 
 }
+
 uint16_t scumm_background_height(void) { 
 	return background_height; 
 }
