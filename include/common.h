@@ -1,3 +1,4 @@
+// Creado por Slam (2026)
 #ifndef COMMON_H
 #define COMMON_H
 
@@ -19,7 +20,7 @@ typedef unsigned int       uintptr_t;
 typedef signed int         intptr_t;
 typedef unsigned int       size_t;
 
-/* Booleanos para kernel bare-metal */
+// Booleanos para kernel bare-metal 
 
 typedef unsigned char bool;
 
