@@ -8,6 +8,7 @@
 #define SCUMM_MAX_WIDTH 640
 #define SCUMM_MAX_HEIGHT 200
 #define SCUMM_MAX_PIXELS (SCUMM_MAX_WIDTH * SCUMM_MAX_HEIGHT)
+#define SCUMM_MAX_ROOMS 256
 
 // Estructura universal para ubicar datos en los archivos .000 y .001 
 typedef struct {
@@ -18,6 +19,7 @@ typedef struct {
 
 // Ciclo de vida y control principal 
 int scumm_init(void);
+int scumm_load_game(void);
 int scumm_start(void);
 void scumm_update(void);
 void scumm_stop(void);
@@ -29,9 +31,9 @@ uint32_t scumm_resource_size(uint8_t module_id);
 
 // Buscador de scripts y lanzador en el planificador 
 int scumm_start_script(uint16_t script_id);
+void scumm_set_object_state(uint16_t obj_id, uint8_t state);
 
 // Interfaz Gráfica de Objetos (Solicitada por la VM) 
-void scumm_set_object_state(uint16_t obj_id, uint8_t state);
 void scumm_draw_frame(uint8_t *framebuffer, uint16_t dest_w, uint16_t dest_h);
 
 // Manejo del Fondo de la habitación activa 
