@@ -17,5 +17,10 @@ Las pruebas del motor son ejecutadas en un sistema operativo sin POSIX o impleme
 # Capturas de pantalla
 <img width="667" height="482" alt="imagen" src="https://github.com/user-attachments/assets/8b065054-367a-4abe-ba7c-d5afcaa01603" />
 
+<img width="642" height="466" alt="imagen" src="https://github.com/user-attachments/assets/5de0bc2e-48fc-4821-99dd-41340d9d5edd" />
+
+<img width="641" height="462" alt="imagen" src="https://github.com/user-attachments/assets/edf5e425-e185-419b-bb0c-c97107c4da4b" />
+
+
 # Licencia
 <b>MIT</b>
