@@ -27,7 +27,7 @@ Las pruebas del motor son ejecutadas en un sistema operativo sin POSIX o impleme
 
 # Juegos pendientes
 - MonkeyIsland 1
-- MonkeyIsland 2
+- MonkeyIsland 2 (hecho)
 
 # Capturas de pantalla
 <img width="667" height="482" alt="imagen" src="https://github.com/user-attachments/assets/8b065054-367a-4abe-ba7c-d5afcaa01603" />
@@ -35,6 +35,9 @@ Las pruebas del motor son ejecutadas en un sistema operativo sin POSIX o impleme
 <img width="642" height="466" alt="imagen" src="https://github.com/user-attachments/assets/5de0bc2e-48fc-4821-99dd-41340d9d5edd" />
 
 <img width="641" height="462" alt="imagen" src="https://github.com/user-attachments/assets/edf5e425-e185-419b-bb0c-c97107c4da4b" />
+
+<img width="719" height="460" alt="imagen" src="https://github.com/user-attachments/assets/a114af69-c436-4490-8601-df7473ac6b6a" />
+
 
 
 # Licencia
